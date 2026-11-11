@@ -1,0 +1,14 @@
+# Virtual environment (private toolbox)
+.venv/
+
+# Python's temporary files
+__pycache__/
+
+# Settings and secrets
+.env
+
+# Real resumes - personal data, never upload!
+data/private/
+
+# Database with interview history
+*.db
