@@ -1,0 +1,22 @@
+JOB TITLE: Data Analyst
+COMPANY: GreenCart Retail (Bengaluru, on-site)
+
+ABOUT THE ROLE
+Help store and sales teams make decisions with data.
+
+REQUIRED SKILLS
+- SQL (complex queries, joins)
+- Excel
+- Power BI or Tableau dashboards
+- Data cleaning
+- Clear communication with non-technical teams
+
+NICE TO HAVE
+- Python and pandas
+- Statistics
+- Retail or sales experience
+
+RESPONSIBILITIES
+- Build and maintain weekly sales dashboards.
+- Find trends and problems in sales data.
+- Present findings to store managers.

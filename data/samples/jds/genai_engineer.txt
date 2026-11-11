@@ -1,0 +1,23 @@
+JOB TITLE: Generative AI Engineer
+COMPANY: Skyline Fintech (Remote, India)
+
+ABOUT THE ROLE
+Design and run production AI systems used by thousands of customers.
+
+REQUIRED SKILLS
+- 3+ years of Python
+- Building LLM applications and AI agents
+- RAG and vector databases
+- Evaluating LLM quality with metrics
+- Docker and cloud deployment (AWS or Azure)
+- Monitoring AI systems in production
+
+NICE TO HAVE
+- Fine-tuning models
+- Kubernetes
+- Finance domain knowledge
+
+RESPONSIBILITIES
+- Build AI agents that help customers with account questions.
+- Set up evaluation pipelines to measure answer quality.
+- Keep systems fast, safe and reliable.

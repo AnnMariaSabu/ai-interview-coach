@@ -1,0 +1,23 @@
+JOB TITLE: Junior AI Engineer
+COMPANY: NovaMind Labs (Kochi, hybrid)
+
+ABOUT THE ROLE
+Build and improve LLM-powered tools for our internal teams.
+
+REQUIRED SKILLS
+- Python
+- Experience with LLMs and retrieval systems (RAG)
+- Working with APIs (REST, FastAPI or Flask)
+- SQL and basic databases
+- Docker
+- Git
+
+NICE TO HAVE
+- Vector databases
+- Prompt engineering
+- Evaluating AI outputs
+
+RESPONSIBILITIES
+- Build chat assistants that answer questions from company documents.
+- Test and improve answer quality.
+- Work with the product team to ship features every two weeks.

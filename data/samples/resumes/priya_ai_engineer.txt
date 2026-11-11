@@ -1,0 +1,24 @@
+PRIYA NAIR
+Junior AI Engineer | Kochi, India | priya.nair@example.com
+
+SUMMARY
+Junior AI engineer with 1 year of experience building LLM applications in Python.
+
+SKILLS
+Python, LangChain, Ollama, RAG, vector databases (ChromaDB), embeddings,
+FastAPI, Streamlit, Git, prompt engineering, pandas
+
+EXPERIENCE
+AI Engineer Intern - BrightLeaf Tech (Jan 2026 - Present)
+- Built a RAG assistant that answers employee questions from 500+ company
+  documents and shows sources; reached 92% accuracy on a test set of 50 questions.
+- Created a FastAPI service for document search used by 3 internal teams.
+- Reduced wrong answers by adding an "I don't know" check when no document matched.
+
+PROJECTS
+- Resume Screener: Streamlit app that ranks resumes against a job description
+  using embeddings.
+- Chat with PDF: local chatbot using Ollama and ChromaDB.
+
+EDUCATION
+B.Tech in Computer Science - 2025

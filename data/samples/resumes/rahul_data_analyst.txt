@@ -1,0 +1,22 @@
+RAHUL MENON
+Data Analyst | Bengaluru, India | rahul.menon@example.com
+
+SUMMARY
+Data analyst with 3 years of experience turning sales data into reports.
+Now learning Python and machine learning to move into AI.
+
+SKILLS
+SQL, Excel, Power BI, Python (basic), pandas, data cleaning, statistics
+
+EXPERIENCE
+Data Analyst - Sunrise Retail (2023 - Present)
+- Built weekly Power BI dashboards for 12 store managers.
+- Wrote SQL queries on a 2-million-row sales database.
+- Found a pricing error that saved the company around 4 lakh rupees a year.
+
+PROJECTS
+- Customer churn prediction with scikit-learn (online course project).
+
+EDUCATION
+B.Com - 2022
+Online course: Machine Learning Basics - 2026
