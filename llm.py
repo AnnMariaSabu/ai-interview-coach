@@ -8,8 +8,20 @@ import config
 client = Client(host=config.OLLAMA_URL)
 
 
-def ask_ai(prompt: str, system: str = "You are a helpful assistant.", json_mode: bool = False) -> str:
+def ask_ai(
+    prompt: str,
+    system: str = "You are a helpful assistant.",
+    json_mode: bool = False,
+    json_schema: dict | None = None,
+) -> str:
     """Send a prompt to the AI and return its text answer."""
+    if json_schema is not None:
+        output_format = json_schema   # strict: the answer must fit this exact form
+    elif json_mode:
+        output_format = "json"        # any JSON
+    else:
+        output_format = None          # normal text
+
     response = client.chat(
         model=config.CHAT_MODEL,
         messages=[
@@ -17,7 +29,7 @@ def ask_ai(prompt: str, system: str = "You are a helpful assistant.", json_mode:
             {"role": "user", "content": prompt},
         ],
         options={"temperature": config.TEMPERATURE},
-        format="json" if json_mode else None,
+        format=output_format,
     )
     return response["message"]["content"]
 

@@ -38,19 +38,21 @@ JOB DESCRIPTION:
 {jd_text}
 """
 
+
 def remove_duplicates(items: list[str]) -> list[str]:
     """Remove repeated items but keep the original order."""
     return list(dict.fromkeys(items))
 
 
-def ask_for_valid_data(prompt: str, schema: type[BaseModel]) -> BaseModel:
-    """Ask the AI for JSON, check it with Pydantic, and retry once if it is invalid."""
+def ask_for_valid_data(prompt: str, schema: type[BaseModel], system: str = SYSTEM_PROMPT) -> BaseModel:
+    """Ask the AI for JSON that fits the schema, check it with Pydantic, and retry once if invalid."""
     for attempt in [1, 2]:
-        raw_answer = ask_ai(prompt, system=SYSTEM_PROMPT, json_mode=True)
+        raw_answer = ask_ai(prompt, system=system, json_schema=schema.model_json_schema())
         try:
             return schema.model_validate_json(raw_answer)
         except ValidationError as error:
             print(f"Attempt {attempt}: the AI's answer was not valid.")
+            print(error)
             prompt = (
                 prompt
                 + "\n\nYour previous answer had these errors:\n"
@@ -69,7 +71,6 @@ def extract_candidate(resume_text: str) -> CandidateProfile:
     profile.projects = remove_duplicates(profile.projects)
     profile.experience = remove_duplicates(profile.experience)
     return profile
-
 
 
 def extract_job(jd_text: str) -> JobProfile:
