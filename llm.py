@@ -20,3 +20,9 @@ def ask_ai(prompt: str, system: str = "You are a helpful assistant.", json_mode:
         format="json" if json_mode else None,
     )
     return response["message"]["content"]
+
+
+def embed(texts: list[str]) -> list[list[float]]:
+    """Turn each text into a list of numbers that captures its meaning."""
+    response = client.embed(model=config.EMBED_MODEL, input=texts)
+    return response["embeddings"]

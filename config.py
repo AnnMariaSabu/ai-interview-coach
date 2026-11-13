@@ -18,6 +18,13 @@ MIN_QUESTIONS = 8
 MAX_QUESTIONS = 10
 MAX_FOLLOW_UPS = 2
 
+
+# 📊 Match score: points for each matched skill
+REQUIRED_WEIGHT = 2
+NICE_TO_HAVE_WEIGHT = 1
+# 🗺️ Skill matching: similarity above this = the skill matches
+# Chosen from the experiment in explore_similarity.py (matches >= 0.65, non-matches <= 0.48)
+MATCH_THRESHOLD = 0.61
 # 📊 Scoring rubric (each criterion is scored 1 to 5)
 SCORE_MIN = 1
 SCORE_MAX = 5
