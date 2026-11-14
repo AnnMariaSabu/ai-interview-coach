@@ -18,11 +18,14 @@ CONVERSATION ABOUT THIS QUESTION SO FAR:
 {conversation}
 
 Decide if you should ask ONE follow-up question.
-Ask a follow-up if the answer is vague, too short, misses important key points,
+First check: did the candidate answer EVERY part of the main question?
+If a part was not answered, ask about that missing part.
+Also ask a follow-up if the answer is vague, too short, misses important key points,
 or makes an interesting claim worth checking (for example a number or a result).
 Do NOT ask a follow-up if the answer is already clear and complete.
 
-The follow-up must be short, about what the candidate just said, and must not repeat the main question.
+The follow-up must be short, about what the candidate just said, and must not repeat
+the main question or an earlier follow-up.
 First write your reason, then your decision.
 If you do not ask a follow-up, leave "follow_up_question" empty.
 """

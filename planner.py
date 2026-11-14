@@ -24,7 +24,7 @@ Write ONE interview question.
 Topic: {topic}
 Instruction: {instruction}
 
-Keep the question short and clear (one sentence).
+Keep the question short and clear (one sentence). Ask about ONE thing only.
 Also list 2 to 4 key points that a strong answer should mention.
 
 Return ONLY JSON in this shape:

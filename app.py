@@ -12,6 +12,8 @@ from interviewer import decide_follow_up
 from loaders import clean_text, read_document
 from matcher import build_match_report
 from planner import plan_interview
+from schemas import AnswerFeedback
+from scorer import average_score, score_answer
 
 SAMPLE_RESUMES = sorted(Path("data/samples/resumes").glob("*.txt"))
 SAMPLE_JOBS = sorted(Path("data/samples/jds").glob("*.txt"))
@@ -32,6 +34,24 @@ def add_message(role: str, content: str):
     st.session_state.messages.append({"role": role, "content": content})
 
 
+def format_feedback(feedback: AnswerFeedback, average: float, question_type: str) -> str:
+    """Turn the judge's feedback into a nice card (Markdown text)."""
+    technical = "–" if question_type == "behavioural" else feedback.technical_accuracy.score
+    good = "\n".join(f"- {point}" for point in feedback.what_was_good)
+    improve = "\n".join(f"- {point}" for point in feedback.what_to_improve)
+    return (
+        f"### 📊 Feedback: {average} / 5\n\n"
+        f"| Relevance | Structure | Specifics | Clarity | Technical |\n"
+        f"|---|---|---|---|---|\n"
+        f"| {feedback.relevance.score} | {feedback.structure.score} | {feedback.specifics.score} "
+        f"| {feedback.clarity.score} | {technical} |\n\n"
+        f"**💪 What was good**\n{good}\n\n"
+        f"**📈 What to improve**\n{improve}\n\n"
+        f"**😕 A weak answer:** {feedback.weak_example}\n\n"
+        f"**🌟 A strong answer:** {feedback.strong_example}"
+    )
+
+
 def ask_current_question():
     """Add the current planned question to the chat and get ready for answers."""
     plan = st.session_state.plan
@@ -45,10 +65,21 @@ def ask_current_question():
 
 
 def finish_current_question():
-    """Save everything said about this question, then move to the next one."""
+    """Score the answer, show the feedback card, then move to the next question."""
     plan = st.session_state.plan
     question = plan.questions[st.session_state.question_index]
-    st.session_state.answers.append({"question": question, "exchanges": st.session_state.exchanges})
+
+    with st.spinner("Scoring your answer..."):
+        feedback = score_answer(question, st.session_state.exchanges)
+    average = average_score(feedback, question.type)
+
+    st.session_state.answers.append({
+        "question": question,
+        "exchanges": st.session_state.exchanges,
+        "feedback": feedback,
+        "average": average,
+    })
+    add_message("assistant", format_feedback(feedback, average, question.type))
 
     st.session_state.question_index += 1
     if st.session_state.question_index < len(plan.questions):
@@ -60,7 +91,7 @@ def start_interview():
     report = st.session_state.report
     st.session_state.messages = []
     st.session_state.question_index = 0
-    st.session_state.answers = []  # every question + its conversation, for scoring later
+    st.session_state.answers = []  # every question + conversation + feedback
 
     add_message(
         "assistant",
@@ -119,7 +150,7 @@ def show_setup():
 # ---------- Screen 2: the interview ----------
 
 def show_interview():
-    """The chat: one question at a time, with follow-ups when needed."""
+    """The chat: one question at a time, with follow-ups and feedback cards."""
     plan = st.session_state.plan
 
     # Show the whole conversation so far
@@ -129,7 +160,9 @@ def show_interview():
 
     # No questions left? The interview is finished.
     if st.session_state.question_index >= len(plan.questions):
-        st.success("🎉 That's the end of the interview! Scoring and feedback come in Phase 6.")
+        averages = [entry["average"] for entry in st.session_state.answers]
+        overall = round(sum(averages) / len(averages), 1)
+        st.success(f"🎉 That's the end of the interview! Your overall score: **{overall} / 5**")
         if st.button("Start over"):
             st.session_state.clear()
             st.rerun()

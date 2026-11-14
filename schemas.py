@@ -72,3 +72,23 @@ class FollowUpDecision(BaseModel):
     reason: str                # why: written FIRST, so the AI thinks before deciding
     ask_follow_up: bool        # True = ask a follow-up, False = move on
     follow_up_question: str    # the follow-up question (empty if not asking)
+
+
+
+class CriterionScore(BaseModel):
+    """The score for one rubric criterion."""
+    reason: str                     # written FIRST, so the AI thinks before scoring
+    score: int = Field(ge=1, le=5)  # 1 to 5
+
+
+class AnswerFeedback(BaseModel):
+    """The feedback card for one answer."""
+    relevance: CriterionScore
+    structure: CriterionScore
+    specifics: CriterionScore
+    clarity: CriterionScore
+    technical_accuracy: CriterionScore
+    what_was_good: list[str]
+    what_to_improve: list[str]
+    weak_example: str     # an example of a weak answer to the same question
+    strong_example: str   # an example of a strong answer to the same question
