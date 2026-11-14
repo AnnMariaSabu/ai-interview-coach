@@ -64,3 +64,11 @@ class InterviewPlan(BaseModel):
         min_length=config.MIN_QUESTIONS,
         max_length=config.MAX_QUESTIONS,
     )
+
+
+
+class FollowUpDecision(BaseModel):
+    """The AI's decision after hearing an answer."""
+    reason: str                # why: written FIRST, so the AI thinks before deciding
+    ask_follow_up: bool        # True = ask a follow-up, False = move on
+    follow_up_question: str    # the follow-up question (empty if not asking)
