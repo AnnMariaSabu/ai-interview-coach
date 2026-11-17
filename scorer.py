@@ -1,13 +1,16 @@
 """
 scorer.py - Score an answer with the rubric and write friendly feedback.
+Very short answers are handled by code (no AI), so nothing gets invented.
 """
 from extractor import ask_for_valid_data
 from interviewer import format_conversation
-from schemas import AnswerFeedback, Question
+from schemas import AnswerFeedback, CriterionScore, Question
+
+MIN_WORDS_TO_JUDGE = 8  # shorter than this = too short for the AI to judge fairly
 
 JUDGE_SYSTEM = (
     "You are a fair and friendly interview coach. You score answers using a rubric. "
-    "Reply only with valid JSON."
+    "Reply only with valid JSON. Keep every text field short."
 )
 
 RUBRIC = """Score each criterion from 1 to 5:
@@ -38,23 +41,46 @@ CONVERSATION (the main answer and any follow-ups):
 {rubric}
 
 Rules:
-- First list each part of the question, and check if the answer covers it.
+- Check if the answer covers every part of the question.
 - Judge the content only, not grammar or English level.
-- Very short or empty answers (like "test" or "I don't know") get 1 for most criteria.
-- Before saying something is missing, check the conversation. Never ask for things the answer already contains.
+- Only praise or mention things the candidate ACTUALLY said in the conversation. Never invent anything.
+- Never ask for things the answer already contains.
 - Give 5 when the answer matches the description of 5. A score of 5 does not mean perfect.
-- For each criterion, write the reason first, then the score.
 - Talk to the candidate directly, using "you". Be friendly and encouraging.
-- "what_was_good" and "what_to_improve": 1 to 3 short points each.
-  If a part of the question was not answered, say so in "what_to_improve".
-- "weak_example": a short example of a weak answer to the same question.
-- "strong_example": a short example of a strong answer to the same question, using STAR where it fits.
-  Use technical terms correctly.
+
+Keep it SHORT:
+- Each "reason": ONE short sentence (maximum 15 words). Write the reason first, then the score.
+- "what_was_good" and "what_to_improve": 1 or 2 points each, one short sentence per point.
+- "weak_example" and "strong_example": 1 or 2 sentences each. Use technical terms correctly.
 """
 
 
+def count_answer_words(exchanges: list[dict]) -> int:
+    """How many words the candidate wrote in total for this question."""
+    return sum(len(exchange["answer"].split()) for exchange in exchanges)
+
+
+def too_short_feedback() -> AnswerFeedback:
+    """An honest feedback card for very short answers. Made by code, so nothing is invented."""
+    low = CriterionScore(reason="The answer was too short to judge.", score=1)
+    return AnswerFeedback(
+        relevance=low,
+        structure=low,
+        specifics=low,
+        clarity=low,
+        technical_accuracy=low,
+        what_was_good=["You gave it a try. That's a start! 😊"],
+        what_to_improve=["Give a full answer: the situation, what you did, how you did it, and the result."],
+        weak_example="I don't know.",
+        strong_example="Use STAR: describe the Situation, your Task, the Actions you took, and a Result with a number.",
+    )
+
+
 def score_answer(question: Question, exchanges: list[dict]) -> AnswerFeedback:
-    """Ask the AI judge to score one answer (including its follow-ups)."""
+    """Score one answer. Code handles very short answers; the AI judge scores real ones."""
+    if count_answer_words(exchanges) < MIN_WORDS_TO_JUDGE:
+        return too_short_feedback()
+
     prompt = SCORING_PROMPT.format(
         question=question.question,
         key_points="\n".join(f"- {point}" for point in question.good_answer_includes),

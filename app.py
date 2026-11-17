@@ -4,20 +4,28 @@ Run it with: streamlit run app.py
 """
 from pathlib import Path
 
+import pandas as pd
 import streamlit as st
 
 import config
+from database import answers_to_details, load_interviews, save_interview
 from extractor import extract_candidate, extract_job
 from interviewer import decide_follow_up
 from loaders import clean_text, read_document
 from matcher import build_match_report
 from planner import plan_interview
+from report import LABELS, best_and_weakest, criterion_averages, overall_score, practice_list
 from schemas import AnswerFeedback
 from scorer import average_score, score_answer
 
 SAMPLE_RESUMES = sorted(Path("data/samples/resumes").glob("*.txt"))
 SAMPLE_JOBS = sorted(Path("data/samples/jds").glob("*.txt"))
 PRIVATE_FOLDER = Path("data/private")  # real resumes go here (ignored by Git)
+
+QUESTION_STARTS = (
+    "which", "what", "who", "where", "when", "why", "how",
+    "can you", "could you", "sorry", "pardon", "repeat", "clarify",
+)
 
 st.set_page_config(page_title="AI Interview Coach", page_icon="🎤")
 st.title("🎤 AI Interview Coach")
@@ -32,6 +40,15 @@ if "stage" not in st.session_state:
 def add_message(role: str, content: str):
     """Save one chat message in memory."""
     st.session_state.messages.append({"role": role, "content": content})
+
+
+def is_clarification(text: str) -> bool:
+    """True if the candidate is asking a short question back, with or without a '?'."""
+    text = text.strip().lower()
+    words = text.split()
+    if text.endswith("?") and len(words) <= 15:
+        return True
+    return len(words) <= 6 and text.startswith(QUESTION_STARTS)
 
 
 def format_feedback(feedback: AnswerFeedback, average: float, question_type: str) -> str:
@@ -53,7 +70,7 @@ def format_feedback(feedback: AnswerFeedback, average: float, question_type: str
 
 
 def ask_current_question():
-    """Add the current planned question to the chat and get ready for answers."""
+    """Add the current planned question (and its topic) to the chat and get ready for answers."""
     plan = st.session_state.plan
     number = st.session_state.question_index
     question = plan.questions[number]
@@ -61,29 +78,52 @@ def ask_current_question():
     st.session_state.current_asked = question.question
     st.session_state.exchanges = []
     st.session_state.follow_up_count = 0
-    add_message("assistant", f"**Question {number + 1} of {len(plan.questions)}:** {question.question}")
+    add_message(
+        "assistant",
+        f"**Question {number + 1} of {len(plan.questions)}:** {question.question}\n\n"
+        f"📌 *Topic: {question.based_on}*",
+    )
 
 
 def finish_current_question():
-    """Score the answer, show the feedback card, then move to the next question."""
+    """Save the answer. Score it now, or later if FEEDBACK_AT_END is on."""
     plan = st.session_state.plan
     question = plan.questions[st.session_state.question_index]
 
-    with st.spinner("Scoring your answer..."):
-        feedback = score_answer(question, st.session_state.exchanges)
-    average = average_score(feedback, question.type)
-
-    st.session_state.answers.append({
-        "question": question,
-        "exchanges": st.session_state.exchanges,
-        "feedback": feedback,
-        "average": average,
-    })
-    add_message("assistant", format_feedback(feedback, average, question.type))
+    if config.FEEDBACK_AT_END:
+        st.session_state.answers.append({
+            "question": question,
+            "exchanges": st.session_state.exchanges,
+            "feedback": None,  # scored later, at the end
+            "average": None,
+        })
+    else:
+        with st.spinner("Scoring your answer..."):
+            feedback = score_answer(question, st.session_state.exchanges)
+        average = average_score(feedback, question.type)
+        st.session_state.answers.append({
+            "question": question,
+            "exchanges": st.session_state.exchanges,
+            "feedback": feedback,
+            "average": average,
+        })
+        add_message("assistant", format_feedback(feedback, average, question.type))
 
     st.session_state.question_index += 1
     if st.session_state.question_index < len(plan.questions):
         ask_current_question()
+
+
+def score_remaining_answers():
+    """Score every answer that has no feedback yet, with a progress bar."""
+    answers = st.session_state.answers
+    progress = st.progress(0.0, text="Scoring your answers...")
+    for number, entry in enumerate(answers, start=1):
+        if entry["feedback"] is None:
+            entry["feedback"] = score_answer(entry["question"], entry["exchanges"])
+            entry["average"] = average_score(entry["feedback"], entry["question"].type)
+        progress.progress(number / len(answers), text=f"Scoring answer {number} of {len(answers)}...")
+    progress.empty()
 
 
 def start_interview():
@@ -93,17 +133,39 @@ def start_interview():
     st.session_state.question_index = 0
     st.session_state.answers = []  # every question + conversation + feedback
 
+    feedback_note = (
+        "📋 *You'll get your feedback for every question at the end of the interview.*"
+        if config.FEEDBACK_AT_END else ""
+    )
     add_message(
         "assistant",
         f"Your match with this role: **{report.match_score}%**\n\n"
         f"💪 **Strengths:** {', '.join(report.strengths) or 'none'}\n\n"
         f"⚠️ **Gaps:** {', '.join(report.gaps) or 'none'}\n\n"
-        "Let's begin! Answer each question as you would in a real interview. 😊",
+        "Let's begin! Answer each question as you would in a real interview. 😊\n\n"
+        "💡 *If a question is unclear, just ask me (for example: \"Which project?\").*\n\n"
+        f"{feedback_note}",
     )
     ask_current_question()
 
 
-# ---------- Screen 1: setup ----------
+def finish_interview():
+    """Score anything not scored yet, save the interview ONCE, then show the report."""
+    score_remaining_answers()
+    details = answers_to_details(st.session_state.answers)
+    st.session_state.details = details
+    save_interview(
+        candidate_name=st.session_state.candidate.name,
+        job_title=st.session_state.job.job_title,
+        match_score=st.session_state.report.match_score,
+        overall_score=overall_score(details),
+        details=details,
+    )
+    st.session_state.stage = "report"  # change stage right away, so we never save twice
+    st.rerun()
+
+
+# ---------- Practice screen 1: setup ----------
 
 def show_setup():
     """Pick a resume and a job, then prepare the interview."""
@@ -147,30 +209,36 @@ def show_setup():
         st.rerun()
 
 
-# ---------- Screen 2: the interview ----------
+# ---------- Practice screen 2: the interview ----------
 
 def show_interview():
-    """The chat: one question at a time, with follow-ups and feedback cards."""
+    """The chat: one question at a time, with follow-ups."""
     plan = st.session_state.plan
 
-    # Show the whole conversation so far
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # No questions left? The interview is finished.
+    # No questions left? Score (if needed), save and go to the report.
     if st.session_state.question_index >= len(plan.questions):
-        averages = [entry["average"] for entry in st.session_state.answers]
-        overall = round(sum(averages) / len(averages), 1)
-        st.success(f"🎉 That's the end of the interview! Your overall score: **{overall} / 5**")
-        if st.button("Start over"):
-            st.session_state.clear()
-            st.rerun()
+        finish_interview()
         return
 
     answer = st.chat_input("Type your answer...")
     if answer:
-        # Show and save the answer
+        question = plan.questions[st.session_state.question_index]
+
+        # 🙋‍♀️ The candidate asked a question back: explain the topic, do NOT score it
+        if is_clarification(answer):
+            add_message("user", answer)
+            add_message(
+                "assistant",
+                f"Good question! 😊 This question is about:\n\n📌 **{question.based_on}**\n\n"
+                "Take your time, and answer when you're ready.",
+            )
+            st.rerun()
+
+        # 💬 A normal answer
         with st.chat_message("user"):
             st.markdown(answer)
         add_message("user", answer)
@@ -179,7 +247,6 @@ def show_interview():
         # Code checks the limit; the AI decides only if a follow-up is still allowed
         decision = None
         if st.session_state.follow_up_count < config.MAX_FOLLOW_UPS:
-            question = plan.questions[st.session_state.question_index]
             with st.spinner("Thinking about your answer..."):
                 decision = decide_follow_up(question, st.session_state.exchanges)
 
@@ -192,8 +259,102 @@ def show_interview():
         st.rerun()
 
 
-# Show the right screen for the current stage
-if st.session_state.stage == "setup":
+# ---------- Practice screen 3: the report ----------
+
+def show_report():
+    """The final report: scores, feedback per question, best and weakest answers, practice list."""
+    details = st.session_state.details
+    match = st.session_state.report
+
+    st.header("📋 Your interview report")
+    st.write(f"**{st.session_state.candidate.name}** · {st.session_state.job.job_title}")
+    st.success(f"🏆 Overall score: **{overall_score(details)} / 5**  ·  Match with the role: **{match.match_score}%**")
+    st.caption("✅ This interview has been saved to your history.")
+
+    st.subheader("📏 Score per criterion")
+    rows = "\n".join(
+        f"| {LABELS[criterion]} | {value if value is not None else '–'} |"
+        for criterion, value in criterion_averages(details).items()
+    )
+    st.markdown("| Criterion | Average (1-5) |\n|---|---|\n" + rows)
+
+    best, weakest = best_and_weakest(details)
+    st.subheader("🌟 Best answer")
+    st.write(f"{best['question']['question']}  **({best['average']} / 5)**")
+    st.subheader("📈 Weakest answer")
+    st.write(f"{weakest['question']['question']}  **({weakest['average']} / 5)**")
+
+    st.subheader("🎯 Your practice list")
+    for item in practice_list(details, match.gaps):
+        st.write(f"- {item}")
+
+    st.subheader("📝 Feedback for each question")
+    for number, entry in enumerate(st.session_state.answers, start=1):
+        with st.expander(f"Question {number}: {entry['average']} / 5 · {entry['question'].question}"):
+            st.markdown(format_feedback(entry["feedback"], entry["average"], entry["question"].type))
+
+    with st.expander("💬 See the full interview"):
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+
+    if st.button("Start a new interview", type="primary"):
+        st.session_state.clear()
+        st.rerun()
+
+
+# ---------- History page ----------
+
+def show_history():
+    """All saved interviews for one person, with a progress chart."""
+    st.header("📈 Your progress")
+    interviews = load_interviews()
+
+    if not interviews:
+        st.info("No interviews yet. Finish one, and it will appear here! 😊")
+        return
+
+    names = sorted({interview["candidate_name"] for interview in interviews})
+    name = st.selectbox("Whose history?", names)
+    mine = [interview for interview in interviews if interview["candidate_name"] == name]
+
+    first, latest = mine[0]["overall_score"], mine[-1]["overall_score"]
+    change = round(latest - first, 1)
+    st.success(
+        f"**{len(mine)}** interview(s) so far  ·  Latest score: **{latest} / 5**  ·  "
+        f"Change since the first: **{change:+} points**"
+    )
+
+    st.subheader("Overall score per interview (1-5)")
+    if len(mine) < 2:
+        st.caption("Finish at least 2 interviews to see your progress line. 📈")
+    else:
+        chart_data = pd.DataFrame({
+            "Interview number": list(range(1, len(mine) + 1)),
+            "Overall score": [interview["overall_score"] for interview in mine],
+        })
+        st.line_chart(chart_data, x="Interview number", y="Overall score")
+
+    st.subheader("All interviews")
+    table_data = pd.DataFrame({
+        "#": list(range(1, len(mine) + 1)),
+        "Date": [interview["date"] for interview in mine],
+        "Job": [interview["job_title"] for interview in mine],
+        "Match": [f"{interview['match_score']}%" for interview in mine],
+        "Overall score": [interview["overall_score"] for interview in mine],
+    })
+    st.dataframe(table_data, hide_index=True, use_container_width=True)
+
+
+# ---------- Which page to show ----------
+
+page = st.sidebar.radio("Menu", ["🎤 Practice", "📈 History"])
+
+if page == "📈 History":
+    show_history()
+elif st.session_state.stage == "setup":
     show_setup()
 elif st.session_state.stage == "interview":
     show_interview()
+elif st.session_state.stage == "report":
+    show_report()

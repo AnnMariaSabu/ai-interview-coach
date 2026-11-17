@@ -24,8 +24,7 @@ Write ONE interview question.
 Topic: {topic}
 Instruction: {instruction}
 
-Keep the question short and clear (one sentence). Ask about ONE thing only.
-Also list 2 to 4 key points that a strong answer should mention.
+Keep the question short and clear (one sentence). Ask about ONE thing only. Always name the project or skill in the question, never just say "the project" or "the platform".
 
 Return ONLY JSON in this shape:
 {{"question": "...", "good_answer_includes": ["...", "..."]}}

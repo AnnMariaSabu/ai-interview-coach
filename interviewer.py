@@ -6,6 +6,11 @@ from schemas import FollowUpDecision, Question
 
 INTERVIEWER_SYSTEM = "You are an experienced, friendly interviewer. Reply only with valid JSON."
 
+DONT_KNOW_PHRASES = [
+    "don't know", "dont know", "do not know", "no idea", "not sure",
+    "no experience", "never used", "skip", "pass",
+]
+
 FOLLOW_UP_PROMPT = """You are interviewing a candidate.
 
 MAIN QUESTION:
@@ -31,6 +36,12 @@ If you do not ask a follow-up, leave "follow_up_question" empty.
 """
 
 
+def is_dont_know(answer: str) -> bool:
+    """True if the answer is a short 'I don't know' (no AI needed)."""
+    text = answer.lower().strip()
+    return len(text.split()) <= 8 and any(phrase in text for phrase in DONT_KNOW_PHRASES)
+
+
 def format_conversation(exchanges: list[dict]) -> str:
     """Turn the questions and answers into a simple script."""
     lines = []
@@ -41,7 +52,15 @@ def format_conversation(exchanges: list[dict]) -> str:
 
 
 def decide_follow_up(question: Question, exchanges: list[dict]) -> FollowUpDecision:
-    """Ask the AI: should we ask a follow-up question?"""
+    """Should we ask a follow-up? Code handles 'I don't know'; the AI decides the rest."""
+    last_answer = exchanges[-1]["answer"]
+    if is_dont_know(last_answer):
+        return FollowUpDecision(
+            reason="The candidate said they don't know, so we move on politely.",
+            ask_follow_up=False,
+            follow_up_question="",
+        )
+
     prompt = FOLLOW_UP_PROMPT.format(
         question=question.question,
         key_points="\n".join(f"- {point}" for point in question.good_answer_includes),

@@ -13,18 +13,22 @@ OLLAMA_URL = "http://localhost:11434"
 # 🎲 AI creativity: 0 = gives the same answer every time (good for fair scoring)
 TEMPERATURE = 0
 
-# 🎤 Interview rules
-MIN_QUESTIONS = 8
-MAX_QUESTIONS = 10
-MAX_FOLLOW_UPS = 2
-
+# 🗺️ Skill matching: similarity above this = the skill matches
+# Chosen from the experiment in explore_similarity.py (matches >= 0.65, non-matches <= 0.57)
+MATCH_THRESHOLD = 0.61
 
 # 📊 Match score: points for each matched skill
 REQUIRED_WEIGHT = 2
 NICE_TO_HAVE_WEIGHT = 1
-# 🗺️ Skill matching: similarity above this = the skill matches
-# Chosen from the experiment in explore_similarity.py (matches >= 0.65, non-matches <= 0.48)
-MATCH_THRESHOLD = 0.61
+
+# 🎤 Interview rules
+MIN_QUESTIONS = 8
+MAX_QUESTIONS = 10
+MAX_FOLLOW_UPS = 1
+
+# ⚡ Feedback at the end: follow-ups still happen, but scoring waits until the interview is finished
+FEEDBACK_AT_END = True
+
 # 📊 Scoring rubric (each criterion is scored 1 to 5)
 SCORE_MIN = 1
 SCORE_MAX = 5
