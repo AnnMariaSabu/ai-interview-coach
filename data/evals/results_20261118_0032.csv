@@ -1,0 +1,7 @@
+﻿id,type,human_score,ai_score,difference,unsure,ai_what_to_improve
+1,project,3.0,3.6,0.6,False,Could have provided more specific numbers or results. / Could have been more concise.
+2,project,5.0,4.4,-0.6,False,Could provide more details about the project. / Consider using the STAR method for structure.
+3,project,1.0,1.4,0.4,False,Needs to provide a specific example or project / Needs to clarify the answer and provide more details
+4,project,5.0,4.0,-1.0,False,Could have been more concise in the answer.
+5,project,4.0,3.6,-0.4,False,Could have provided more concrete numbers or results. / Could have explained technical concepts better.
+6,technical,1.0,1.2,0.2,False,Provided a general concept of embeddings. / Explained how embeddings compare texts.

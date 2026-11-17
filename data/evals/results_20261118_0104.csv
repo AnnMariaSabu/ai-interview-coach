@@ -1,0 +1,30 @@
+﻿id,type,human_score,ai_score,difference,unsure,ai_what_to_improve
+1,project,3.0,2.8,-0.2,False,You could have provided more details about the project's results. / You could have explained how wrong answers were prevented.
+2,project,5.0,4.6,-0.4,False,Could provide more detail about the project. / Could expand on the results.
+3,project,1.0,1.4,0.4,False,Provides no specific example or result / Does not explain how retrieval works
+4,project,5.0,4.0,-1.0,False,Could provide more detail about the task and process. / Could make the answer more concise.
+5,project,4.0,4.2,0.2,False,Could have been more detailed about the project. / Could have explained technical concepts better.
+6,technical,1.0,1.2,0.2,False,Could have explained how embeddings compare texts more clearly.
+7,technical,5.0,4.4,-0.6,False,Could be slightly more detailed in the explanation. / Could provide more examples or results.
+8,technical,4.0,3.0,-1.0,False,Could provide more specific examples or numbers to support the answer. / Could clarify the answer to cover all parts of the question.
+9,technical,1.0,1.4,0.4,False,Could provide a clear and concise explanation of embeddings and their use in text comparison.
+10,technical,4.0,3.8,-0.2,False,Could provide more specific numbers or results to support the example. / Could explain the technical concepts more thoroughly.
+11,technical,4.0,4.0,0.0,False,Could provide more explicit examples or details. / Could make the answer more concise.
+12,technical,1.0,1.8,0.8,False,Needs to explain validation and error handling in more detail / Needs to address every part of the question
+13,technical,4.0,4.0,0.0,False,Could provide more details on how to handle errors or retry requests. / Mentioned retrying or handling errors would have strengthened the answer.
+14,technical,5.0,3.8,-1.2,False,Could provide more detail about the benefits of using Pydantic
+15,technical,2.0,2.2,0.2,False,Provide more details and examples. / Use a clear and structured answer format.
+16,behavioural,2.0,2.2,0.2,False,Provided more context about the situation and the bug. / Explained the fix and its impact in more detail.
+17,behavioural,5.0,4.2,-0.8,False,Could be more detailed about the process
+18,behavioural,1.0,1.5,0.5,False,Lacks specific details about the bug and fix / Does not demonstrate a clear understanding of the issue
+19,behavioural,4.0,2.2,-1.8,False,Lacked detail and explanation of the fix / Did not provide a clear result or outcome
+20,behavioural,3.0,5.0,2.0,False,There is no explanation of the task or challenge faced in the bug. / The answer could benefit from more detail on the result or outcome.
+21,gap,2.0,2.8,0.8,False,Could provide more specific examples or details. / Develop a more concrete learning plan.
+22,gap,1.0,1.4,0.4,False,Provide a clear and concise explanation of Docker's purpose. / Use technical terms correctly.
+23,gap,4.0,3.8,-0.2,False,Could have explained Docker images better / Could have provided more details
+24,gap,1.0,1.8,0.8,False,Provide a clear learning plan and concrete examples.
+25,gap,5.0,3.4,-1.6,False,Lacks specific examples or details about the learning plan. / Does not elaborate on the benefits of Docker.
+27,behavioural,5.0,4.0,-1.0,False,The candidate's answer could have been more detailed. / The candidate could have elaborated on the technical concepts used.
+28,behavioural,3.0,2.0,-1.0,False,Lacked specific details and numbers to support the answer. / Could have explained the technical meaning of 'prompt'.
+29,behavioural,4.0,4.2,0.2,False,Could have been more explicit in the structure. / Could have explained technical concepts better.
+30,behavioural,1.0,1.5,0.5,False,Lacked specific examples and results. / Did not clearly explain how they improved AI quality.
