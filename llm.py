@@ -17,6 +17,7 @@ def ask_ai(
     system: str = "You are a helpful assistant.",
     json_mode: bool = False,
     json_schema: dict | None = None,
+    temperature: float | None = None,
 ) -> str:
     """Send a prompt to the AI and return its text answer."""
     if json_schema is not None:
@@ -26,6 +27,9 @@ def ask_ai(
     else:
         output_format = None          # normal text
 
+    if temperature is None:
+        temperature = config.TEMPERATURE  # default: 0, calm and consistent
+
     start = time.perf_counter()  # ⏱️ start the stopwatch
     response = client.chat(
         model=config.CHAT_MODEL,
@@ -33,7 +37,7 @@ def ask_ai(
             {"role": "system", "content": system},
             {"role": "user", "content": prompt},
         ],
-        options={"temperature": config.TEMPERATURE},
+        options={"temperature": temperature},
         format=output_format,
         keep_alive=KEEP_MODEL_LOADED,
     )

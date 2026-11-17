@@ -44,10 +44,20 @@ def remove_duplicates(items: list[str]) -> list[str]:
     return list(dict.fromkeys(items))
 
 
-def ask_for_valid_data(prompt: str, schema: type[BaseModel], system: str = SYSTEM_PROMPT) -> BaseModel:
+def ask_for_valid_data(
+    prompt: str,
+    schema: type[BaseModel],
+    system: str = SYSTEM_PROMPT,
+    temperature: float | None = None,
+) -> BaseModel:
     """Ask the AI for JSON that fits the schema, check it with Pydantic, and retry once if invalid."""
     for attempt in [1, 2]:
-        raw_answer = ask_ai(prompt, system=system, json_schema=schema.model_json_schema())
+        raw_answer = ask_ai(
+            prompt,
+            system=system,
+            json_schema=schema.model_json_schema(),
+            temperature=temperature,
+        )
         try:
             return schema.model_validate_json(raw_answer)
         except ValidationError as error:
