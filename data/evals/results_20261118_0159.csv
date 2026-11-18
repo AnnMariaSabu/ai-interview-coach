@@ -1,0 +1,31 @@
+﻿id,type,human_score,ai_score,difference,unsure,ai_what_to_improve
+1,project,3.0,3.8,0.8,False,"lacks a clear situation, task, action, result / could be more concise"
+2,project,5.0,5.0,0.0,False,could elaborate more on the project's challenges
+3,project,1.0,1.6,0.6,False,Lacks specific examples and details about the project / Does not answer the question directly
+4,project,5.0,5.0,0.0,False,could elaborate more on the retrieval process
+5,project,4.0,3.0,-1.0,False,Lacks concrete examples or results to support the answer. / Could provide more clarity and specificity in the answer.
+6,technical,1.0,1.4,0.4,False,Needs to explain how embeddings work and compare texts / Needs to provide a concrete example or use case
+7,technical,5.0,5.0,0.0,False,"could provide more details about the example, such as the data used"
+8,technical,4.0,2.4,-1.6,False,"Could provide a concrete example or explain how embeddings work / Mentions cosine similarity, but does not explain its relevance"
+9,technical,1.0,1.8,0.8,False,Lacks concrete examples and technical accuracy / Does not answer every part of the question
+10,technical,4.0,3.6,-0.4,False,lacks specific details and examples / could be more concise
+11,technical,4.0,5.0,1.0,False,could elaborate more on the benefits of using structured outputs
+12,technical,1.0,1.4,0.4,False,Lacks specific examples and details / Does not address error handling or validation
+13,technical,4.0,2.8,-1.2,False,Lacks a specific example to illustrate the process. / Could provide more detail on how Pydantic is used.
+14,technical,5.0,4.0,-1.0,False,could be a bit longer / uses Ollama incorrectly
+15,technical,2.0,1.4,-0.6,False,Lacks specific examples and numbers / Does not address error handling or validation
+16,behavioural,2.0,2.5,0.5,False,Lacks detail and could be clearer / Does not explain how the fix was implemented or tested
+17,behavioural,5.0,5.0,0.0,False,None
+18,behavioural,1.0,1.0,0.0,False,Could provide a specific example of a bug fix and the results. / Should describe the steps taken to fix the bug.
+19,behavioural,4.0,2.2,-1.8,False,Lacks detail and context / Does not explain how the bug was found or the fix
+20,behavioural,5.0,4.0,-1.0,False,The answer could benefit from more detail about the threshold adjustment process. / The technical accuracy could be improved with more explanation of the threshold adjustment.
+21,gap,2.0,1.6,-0.4,False,Lacks specific details about Docker / Does not explain how to learn Docker
+22,gap,1.0,1.4,0.4,False,Lacks specific examples and a concrete learning plan / Does not answer the question thoroughly
+23,gap,4.0,2.8,-1.2,False,Lacks specific details and concrete examples to support the answer. / Could benefit from a clearer 'Situation' and 'Task' to provide more context.
+24,gap,1.0,1.4,0.4,False,You need to provide a clear learning plan and concrete examples / You need to address every part of the question
+25,gap,5.0,3.0,-2.0,False,Lacks specific details about the app and its dependencies / Lacks concrete numbers or results / Lacks technical accuracy about images and Dockerfiles
+26,behavioural,1.0,1.5,0.5,False,You need to provide more details about the testing and improvement process / You need to demonstrate a clear understanding of testing and improving AI systems
+27,behavioural,5.0,5.0,0.0,False,could provide more context about the RAG assistant
+28,behavioural,3.0,2.5,-0.5,False,Lacks specific details and metrics / Does not demonstrate a clear understanding of the chatbot's performance
+29,behavioural,4.0,5.0,1.0,False,could provide more detail on limitations
+30,behavioural,1.0,1.8,0.8,False,Lacks specific examples and results / Does not answer the question directly
