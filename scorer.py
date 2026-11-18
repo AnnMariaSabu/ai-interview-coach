@@ -1,7 +1,6 @@
 """
 scorer.py - Score an answer with the rubric and write friendly feedback.
 Very short answers are handled by code (no AI), so nothing gets invented.
-Calibration examples (few-shot) show the judge what a 5, a 3 and a 1 look like.
 """
 from extractor import ask_for_valid_data
 from interviewer import format_conversation
@@ -28,31 +27,7 @@ CLARITY - Is it easy to follow, not too long or vague?
 TECHNICAL ACCURACY - Are technical concepts used correctly?
   1 = wrong, 3 = partly correct or shallow, 5 = correct and precise"""
 
-# Calibration examples (few-shot). They use a DIFFERENT question from the eval set, to avoid data leakage.
-CALIBRATION_EXAMPLES = """CALIBRATION EXAMPLES (a different question, only to show what each score looks like):
-
-Question: "Tell me about a project where you used Python to automate a task."
-
-Answer that deserves 5 on every criterion:
-"At my college library, staff spent 3 hours every week copying book returns into a spreadsheet.
-My task was to automate it. I wrote a Python script that reads the return logs, cleans the data
-with pandas and updates the spreadsheet. I tested it on 4 weeks of old logs and it matched the
-manual sheet exactly. Now the job takes 2 minutes instead of 3 hours."
-Why 5: it answers every part, follows STAR, gives numbers, is clear, and uses Python and pandas correctly.
-
-Answer that deserves about 3:
-"I wrote a Python script that renames files in a folder automatically. It saved me some time."
-Why 3: relevant and clear, but very little detail, no real structure and no numbers.
-
-Answer that deserves 1 on every criterion:
-"Python is a very useful language for automation and many companies use it."
-Why 1: it does not describe any project, so it does not answer the question."""
-
 SCORING_PROMPT = """Score the candidate's answer in this mock interview.
-
-{examples}
-
-NOW SCORE THIS ANSWER:
 
 QUESTION:
 {question}
@@ -66,11 +41,11 @@ CONVERSATION (the main answer and any follow-ups):
 {rubric}
 
 Rules:
-- Use the full range from 1 to 5. Give 5 when the answer is as good as the 5 example, and 1 when it is as weak as the 1 example.
 - Check if the answer covers every part of the question.
 - Judge the content only, not grammar or English level.
 - Only praise or mention things the candidate ACTUALLY said in the conversation. Never invent anything.
 - Never ask for things the answer already contains.
+- Give 5 when the answer matches the description of 5. A score of 5 does not mean perfect.
 - Talk to the candidate directly, using "you". Be friendly and encouraging.
 
 Keep it SHORT:
@@ -107,7 +82,6 @@ def score_answer(question: Question, exchanges: list[dict]) -> AnswerFeedback:
         return too_short_feedback()
 
     prompt = SCORING_PROMPT.format(
-        examples=CALIBRATION_EXAMPLES,
         question=question.question,
         key_points="\n".join(f"- {point}" for point in question.good_answer_includes),
         conversation=format_conversation(exchanges),
