@@ -50,6 +50,7 @@ def generate():
             "ai_asked": "yes" if decision.ask_follow_up else "no",
             "follow_up": decision.follow_up_question,
             "ai_reason": decision.reason,
+            "missing_key_points": " | ".join(decision.missing_key_points),
             "rating": "",
         })
 
@@ -79,20 +80,28 @@ def auto():
               f"({len(unnecessary) / len(strong):.0%})")
         for row in unnecessary:
             print(f"     id {row['id']}: {row['follow_up']}")
+            if row.get("missing_key_points"):
+                print(f"        AI thought missing: {row['missing_key_points']}")
 
     # 3. Is the follow-up almost the same as the main question? (embeddings + cosine similarity)
-    texts = []
-    for row in asked:
-        texts += [row["question"], row["follow_up"]]
-    vectors = embed(texts)
-    repeats = []
-    for index, row in enumerate(asked):
-        similarity = cosine_similarity(vectors[2 * index], vectors[2 * index + 1])
-        if similarity >= REPEAT_THRESHOLD:
-            repeats.append((row, similarity))
-    print(f"3. Repeated questions: {len(repeats)}/{len(asked)} follow-ups are very similar to the main question")
-    for row, similarity in repeats:
-        print(f"     id {row['id']} ({similarity:.2f}): {row['follow_up']}")
+    if asked:
+        texts = []
+        for row in asked:
+            texts += [row["question"], row["follow_up"]]
+        vectors = embed(texts)
+        repeats = []
+        for index, row in enumerate(asked):
+            similarity = cosine_similarity(vectors[2 * index], vectors[2 * index + 1])
+            if similarity >= REPEAT_THRESHOLD:
+                repeats.append((row, similarity))
+        print(f"3. Similar to the main question: {len(repeats)}/{len(asked)} follow-ups "
+              f"(remember: these can still be good, so check them by eye)")
+        for row, similarity in repeats:
+            print(f"     id {row['id']} ({similarity:.2f}): {row['follow_up']}")
+
+    # 4. Which answers moved on without a follow-up?
+    skipped = [row for row in rows if row["ai_asked"] == "no"]
+    print(f"4. No follow-up for {len(skipped)}/{n} answers: ids {', '.join(row['id'] for row in skipped) or 'none'}")
 
 
 def summary():

@@ -66,13 +66,12 @@ class InterviewPlan(BaseModel):
     )
 
 
-
 class FollowUpDecision(BaseModel):
     """The AI's decision after hearing an answer."""
-    reason: str                # why: written FIRST, so the AI thinks before deciding
-    ask_follow_up: bool        # True = ask a follow-up, False = move on
-    follow_up_question: str    # the follow-up question (empty if not asking)
-
+    missing_key_points: list[str]  # FIRST: key points the answer did NOT cover (empty if none)
+    reason: str                    # why: written before deciding
+    ask_follow_up: bool            # True = ask a follow-up, False = move on
+    follow_up_question: str        # the follow-up question (empty if not asking)
 
 
 class CriterionScore(BaseModel):
