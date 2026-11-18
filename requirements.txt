@@ -3,3 +3,4 @@ python-docx
 ollama
 pydantic
 streamlit
+pandas
